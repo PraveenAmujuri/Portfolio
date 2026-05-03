@@ -1,58 +1,267 @@
+import { useEffect, useState } from "react";
 import profile from "../assets/profile.png";
 
+const SHAPES = [
+  "polygon(0% 0%, 85% 0%, 100% 15%, 100% 100%, 0% 100%)",
+  "polygon(0% 0%, 100% 0%, 100% 85%, 85% 100%, 0% 100%)",
+  "polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 15%)",
+  "polygon(0% 0%, 100% 0%, 100% 100%, 15% 100%, 0% 85%)",
+];
+
 export default function Hero() {
+  const [shapeIdx, setShapeIdx] = useState(0);
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFading(true);
+      setTimeout(() => {
+        setShapeIdx((i) => (i + 1) % SHAPES.length);
+        setFading(false);
+      }, 400);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // THE FIX: We now define the starting point of the full visual blocks.
+  // We will tell the CSS Grid to make each of these span 2 mathematical rows.
+  const emptyCells = [
+    // Visual Row 2 (Spans Math Rows 3 & 4)
+    [3,3], [3,4], [3,5], [3,6], [3,7],
+    // Visual Row 3 (Spans Math Rows 5 & 6)
+    [5,3], [5,4], [5,5], [5,6], [5,7],
+    // Visual Row 4 (Spans Math Rows 7 & 8)
+    [7,3], [7,4]
+  ];
+
   return (
-    <section className="min-h-screen flex items-center justify-center bg-[#f5f5f2] px-6">
-      <div className="h-[100px]" />
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,900;1,400;1,900&family=DM+Mono:wght@300;400&display=swap');
 
-      <div className="w-full max-w-6xl flex items-center justify-between gap-16">
+        /* ─── THE 100VH 16:9 WRAPPER ─── */
+        .blueprint-wrapper {
+          margin-top: 40px; 
+          height: calc(100vh - 80px); 
+          width: 100%;
+          background: #1a1a1a;
+          box-sizing: border-box;
+          border-bottom: 1px solid #1a1a1a;
+        }
 
-        {/* LEFT */}
-        <div className="max-w-xl">
-          <p className="text-sm text-gray-600 mb-4">
-            Hello, I’m Praveen,
-          </p>
+        /* ─── THE 8x8 INTERNAL MATHEMATICAL GRID ─── */
+/* ─── THE 8x8 INTERNAL MATHEMATICAL GRID ─── */
+        .grid-8x8 {
+          display: grid;
+          grid-template-columns: repeat(8, 1fr); /* REMOVED the extra 80px column */
+          grid-template-rows: repeat(8, 1fr);
+          height: 100%;
+          width: 100%;
+          
+          /* Draws the flawless 1px black blueprint lines */
+gap: 1px;
+  background: #1f1f1f;
+           
+          
+          font-family: 'DM Mono', monospace;
+          color: #1a1a1a;
+        }
+        /* Base rule for EVERY cell to reveal the black gap lines */
+        .grid-8x8 > div {
+          background: #f8f8f7; 
+          min-height: 0;
+          min-width: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+        }
 
-          <h1 className="text-6xl md:text-7xl font-extrabold text-[#0b0f3b] leading-tight">
-            Applied AI <br /> Engineer
-          </h1>
+        /* =========================================
+           YOUR EXACT SKETCH MAPPINGS
+        ========================================= */
 
-          <p className="mt-4 text-gray-600">
-            building intelligent systems & full-stack applications
-          </p>
+        .cell-logo {
+          grid-area: 1 / 1 / 3 / 2; 
+          font-size: clamp(12px, 1.2vw, 16px);
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          color: #888;
+        }
+        
+        .cell-applied-ai {
+          grid-area: 1 / 2 / 3 / 6; 
+          flex-direction: column;
+          font-family: 'Playfair Display', serif;
+          font-size: clamp(32px, 4.5vw, 64px); 
+          font-weight: 900;
+          text-transform: uppercase;
+          line-height: 1.1;
+          padding-left: 24px;
+          align-items: flex-start !important; 
+        }
 
-          <button className="mt-6 px-5 py-2 bg-yellow-400 text-black rounded-md hover:scale-105 transition">
-            Resume
-          </button>
-        </div>
+        .cell-in-ai-dev {
+          grid-area: 1 / 6 / 2 / 9; 
+          font-size: clamp(10px, 1vw, 14px);
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+        }
 
-        {/* RIGHT */}
-        <div className="relative flex items-center justify-center">
+        .cell-projects {
+          grid-area: 2 / 6 / 3 / 7; 
+          flex-direction: column;
+        }
+        
+        .cell-cgpa {
+          grid-area: 2 / 7 / 3 / 8; 
+          flex-direction: column;
+        }
 
-          {/* OUTER RING */}
-          <div className="absolute w-72 h-72 rounded-full border border-[#d8d3a8]" />
+        /* Shared style for the two stat boxes */
+        .stat-val {
+          font-family: 'Playfair Display', serif;
+          font-size: clamp(16px, 1.8vw, 32px);
+          font-weight: 900;
+        }
+        .stat-lbl {
+          font-size: clamp(7px, 0.6vw, 10px);
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #888;
+          margin-top: 4px;
+        }
 
-          {/* IMAGE */}
-          <div className="w-64 h-64 rounded-full overflow-hidden bg-white border border-[#e3dec0]">
-            <img
-              src={profile}
-              alt="Praveen"
-              className="w-full h-full object-cover"
+        .cell-name {
+          grid-area: 2 / 8 / 9 / 9; 
+          background: #f4f1ec;
+        }
+        .upright-text {
+          writing-mode: vertical-rl;
+          text-orientation: upright;
+          font-size: clamp(14px, 2.8vh, 32px); 
+          font-weight: 400;
+          letter-spacing: -2px; 
+          text-transform: uppercase;
+        }
+
+        .cell-image {
+          grid-area: 3 / 1 / 8 / 3; 
+          padding: 0 !important;
+        }
+        .sketch-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center 15%;
+          filter: grayscale(100%) contrast(1.15) brightness(0.9);
+          transition: clip-path 0.4s ease, opacity 0.4s ease;
+        }
+
+        .cell-resume {
+          grid-area: 8 / 1 / 9 / 3; 
+          font-size: clamp(12px, 1.5vw, 16px);
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: background 0.2s, color 0.2s;
+        }
+        .cell-resume:hover {
+          background: #1a1a1a;
+          color: #f4f1ec;
+        }
+
+        .cell-android {
+          grid-area: 7 / 5 / 9 / 8; 
+          font-family: 'Playfair Display', serif;
+          font-size: clamp(20px, 2.5vw, 42px);
+          font-weight: 900;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+
+        /* ─── MOBILE OVERRIDE ─── */
+        @media (max-width: 900px) {
+          .blueprint-wrapper { margin-top: 60px; height: auto; }
+          .grid-8x8 {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
+            height: auto;
+          }
+          .grid-8x8 > div {
+            grid-area: auto !important; 
+            min-height: 100px;
+          }
+          .cell-image { min-height: 400px; }
+          .empty-grid-cell { display: none !important; }
+          .upright-text { writing-mode: horizontal-tb; text-orientation: mixed; letter-spacing: 0.2em; }
+        }
+      `}</style>
+
+      <div className="blueprint-wrapper">
+        <section className="grid-8x8">
+          
+          <div className="cell-logo">Logo</div>
+          
+          <div className="cell-applied-ai">
+            <span>Applied AI</span>
+            <span>Engineer</span>
+          </div>
+          
+          <div className="cell-in-ai-dev">
+            IN / AI / DEV
+          </div>
+          
+          <div className="cell-projects">
+            <span className="stat-val">15+</span>
+            <span className="stat-lbl">Projects</span>
+          </div>
+          
+          <div className="cell-cgpa">
+            <span className="stat-val">7.62</span>
+            <span className="stat-lbl">CGPA</span>
+          </div>
+          
+          <div className="cell-name">
+            <span className="upright-text">Sai Praveen</span>
+          </div>
+          
+          <div className="cell-image">
+            <img 
+              src={profile} 
+              alt="Profile" 
+              className="sketch-img"
+              style={{
+                clipPath: SHAPES[shapeIdx],
+                opacity: fading ? 0 : 1,
+              }}
             />
           </div>
-
-          {/* DECORATIONS */}
-          <div className="absolute top-6 right-6 text-[#0b0f3b] text-lg">
-            + +
+          
+          <div 
+            className="cell-resume" 
+            onClick={() => window.open("/resume.pdf", "_blank")}
+          >
+            Get Resume
+          </div>
+          
+          <div className="cell-android">
+            Android Development
           </div>
 
-          <div className="absolute bottom-8 left-6 text-[#0b0f3b] text-lg">
-            //// 
-          </div>
+          {/* THE FIX: Render the empty cells to span 2 math rows (pos[0] + 2) 
+              This perfectly removes the horizontal half-lines while keeping vertical structure */}
+          {emptyCells.map((pos, index) => (
+            <div 
+              key={`empty-${index}`} 
+              className="empty-grid-cell"
+              style={{ gridArea: `${pos[0]} / ${pos[1]} / ${pos[0] + 2} / ${pos[1] + 1}` }}
+            ></div>
+          ))}
 
-        </div>
-
+        </section>
       </div>
-    </section>
+    </>
   );
 }
