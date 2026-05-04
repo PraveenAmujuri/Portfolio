@@ -137,7 +137,7 @@ tl.to(
 >
     <motion.div
       ref={navRef}
-      className="pointer-events-auto overflow-hidden border-2 border-white relative"
+      className="pointer-events-auto overflow-hidden border-2 border-white relative mx-auto"
       style={{
         width: dynamicWidth,
         borderRadius: dynamicRadius,
