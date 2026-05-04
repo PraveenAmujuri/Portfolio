@@ -80,8 +80,9 @@ export default function Hero() {
 
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,900;1,400;1,900&family=DM+Mono:wght@300;400&display=swap');
 
-
-
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@900&family=Inter:wght@900&family=DM+Mono:wght@300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Notable&display=swap');
         /* ─── THE 100VH 16:9 WRAPPER ─── */
 
         .blueprint-wrapper {
@@ -174,9 +175,8 @@ export default function Hero() {
 
   */
 
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
-
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+border-right: 1px solid rgba(0, 0, 0, 0.22);
+border-bottom: 1px solid rgba(0, 0, 0, 0.22);
 
 }
 
@@ -210,9 +210,9 @@ export default function Hero() {
 
   background: #f8f8f7 !important;
 
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
-
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.22);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.22);
+}
 
 }
 
@@ -336,23 +336,137 @@ export default function Hero() {
 
         }
 
-        .upright-text {
+/* Update in Hero.js CSS section */
 
-          writing-mode: vertical-rl;
+.cell-name {
+  grid-area: 2 / 8 / 9 / 9;
+  background: #f8f8f7 !important;
 
-          text-orientation: upright;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
 
-          font-size: clamp(14px, 2.8vh, 32px);
+  overflow: hidden;
+}
 
-          font-weight: 400;
+.upright-text {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+    justify-content: space-between;
 
-          letter-spacing: -2px;
+  align-items: center;
+  letter-spacing: -0.03em;
+}
 
-          text-transform: uppercase;
+.cell-name {
+height: 100%;
+  overflow: visible;
+}
 
-        }
+.upright-text {
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: space-between; /* 🔥 fills height */
+  align-items: center;
+}
+
+.letter {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+
+  font-size: min(13vh, 9vw); /* 🔥 THIS IS THE REAL FIX */
+
+  line-height: 0.75; /* tighten */
+  letter-spacing: -0.02em;
+
+  color: #111;
+  will-change: transform, opacity;
+}
 
 
+/* STRUCTURED DROP */
+.letter-wrap.structured-drop {
+  opacity: 0;
+  transform: translateY(-100%) scale(0.98);
+
+  animation: gridDrop 0.7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  animation-delay: var(--delay);
+}
+
+@keyframes gridDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%) scale(0.98);
+    filter: blur(3px);
+  }
+
+  70% {
+    opacity: 1;
+    transform: translateY(4%) scale(1);
+    filter: blur(0.5px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0%) scale(1);
+    filter: blur(0);
+  }
+}
+.letter-wrap {
+  position: relative;
+  display: block; /* 🔥 NOT inline-block */
+  width: 100%;
+  text-align: center;
+  
+}
+
+/* FILLED TEXT (base) */
+.letter-fill {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  color: #111;
+  transition: opacity 0.25s ease;
+}
+
+/* STROKE LAYER (hidden initially) */
+.letter-stroke {
+  position: absolute;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1.5px #111;
+
+  clip-path: inset(0 0 100% 0);
+}
+.letter-wrap:hover .letter-stroke {
+  animation: strokeReveal 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.letter-wrap:not(:hover) .letter-stroke {
+  clip-path: inset(0 0 100% 0); /* reset */
+}
+
+.letter-wrap:hover .letter-fill {
+  opacity: 0.2;
+}
+
+/* KEYFRAME */
+@keyframes strokeReveal {
+  0% {
+    clip-path: inset(0 0 100% 0);
+  }
+  100% {
+    clip-path: inset(0 0 0% 0);
+  }
+}
 
         .cell-image {
 
@@ -498,6 +612,7 @@ export default function Hero() {
   white-space: nowrap;
 
 }
+  
 
 
 
@@ -566,12 +681,22 @@ export default function Hero() {
 
          
 
-          <div className="cell-name">
 
-            <span className="upright-text">Sai Praveen</span>
 
-          </div>
-
+<div className="cell-name">
+  <div className="upright-text">
+{"PRAVEEN".split("").map((char, index) => (
+  <span
+    key={index}
+    className="letter-wrap structured-drop"
+    style={{ "--delay": `${index * 0.1}s` }}
+  >
+    <span className="letter letter-fill">{char}</span>
+    <span className="letter letter-stroke">{char}</span>
+  </span>
+))}
+  </div>
+</div>
          
 
           <div className="cell-image">
