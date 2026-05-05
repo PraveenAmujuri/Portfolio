@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import profile from "../assets/profile.png";
 
 import TextPressure from "../components/TextPressure";
-
+import logo from "../assets/logo/logo.svg";
 
 
 const SHAPES = [
@@ -18,6 +18,14 @@ const SHAPES = [
 
 ];
 
+const ROLES = [
+  "ANDROID DEV.",
+  "WEB DEV.",
+  "AI/ML DEV.",
+  "OPEN SOURCE",
+  "SYSTEM BUILDER"
+];
+
 
 
 export default function Hero() {
@@ -25,6 +33,25 @@ export default function Hero() {
   const [shapeIdx, setShapeIdx] = useState(0);
 
   const [fading, setFading] = useState(false);
+  const [roleIndex, setRoleIndex] = useState(0);
+const [role, setRole] = useState(ROLES[0]);
+const [animKey, setAnimKey] = useState(0);
+const [mainWord, suffixWord] = role.split(" ");
+useEffect(() => {
+  const interval = setInterval(() => {
+    setRoleIndex((prev) => {
+      const next = (prev + 1) % ROLES.length;
+
+      // trigger re-animation
+      setAnimKey((k) => k + 1);
+      setRole(ROLES[next]);
+
+      return next;
+    });
+  }, 3200); 
+
+  return () => clearInterval(interval);
+}, []);
 
 
 
@@ -70,7 +97,7 @@ export default function Hero() {
 
   ];
 
-
+const baseDelay = 0.4; // wait for PRAVEEN to finish
 
   return (
 
@@ -265,26 +292,56 @@ border-bottom: 1px solid rgba(0, 0, 0, 0.22);
         }
 
 
+/* Update in Hero.js CSS section */
 
-        .cell-in-ai-dev {
+.cell-in-ai-dev {
+  grid-area: 1 / 6 / 2 / 9;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 32px; 
+  justify-content: flex-end;
+  padding-right: 40px; 
 
-          grid-area: 1 / 6 / 2 / 9;
+  /* 
+     THE LIGHTWEIGHT FIX:
+     Switch from utilitarian Inter to elegant serif (Playfair Display).
+  */
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(14px, 1.2vw, 17px); /* Slightly refined size */
+  color: #111;
+  letter-spacing: 0.12em; /* CRITICAL: Increased spacing creates lightness */
+  
+  position: relative;
+  z-index: 1;
+}
 
-          font-size: clamp(10px, 1vw, 14px);
+.first-word-italic {
+  /* Use the existing setup, but ensure font-family is consistent */
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 400; /* Use a normal/light weight */
+  margin-right: 6px; /* Subtle space before the comma */
+}
 
-          letter-spacing: 0.2em;
-
-          text-transform: uppercase;
-
-        }
-
-
+.normal-text {
+  /* 
+     Match the elegant serif instead of the heavy sans-serif.
+     The all-caps approach is maintained for technical authority, 
+     but the font choice makes it feel delicate.
+  */
+  font-family: 'Playfair Display', serif;
+  font-style: normal;
+  font-weight: 400; /* Use a light weight */
+  text-transform: uppercase;
+  opacity: 0.7; /* Increased transparency for softness */
+}
 
         .cell-projects {
 
           grid-area: 2 / 6 / 3 / 7;
 
           flex-direction: column;
+          border-right: 1px solid rgba(0, 0, 0, 0.22) !important;
 
         }
 
@@ -302,31 +359,53 @@ border-bottom: 1px solid rgba(0, 0, 0, 0.22);
 
         /* Shared style for the two stat boxes */
 
-        .stat-val {
+/* Update in Hero.js CSS section */
+/* STATS: TECHNICAL MINIMALISM */
 
-          font-family: 'Playfair Display', serif;
+.cell-projects, .cell-cgpa {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
 
-          font-size: clamp(16px, 1.8vw, 32px);
+.stat-val {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: clamp(30px, 2.8vw, 38px); 
+  color: #111;
+  
+  /* THE ALIGNMENT CORE */
+  display: flex;
+  align-items: center; /* This centers the + relative to the 15 */
+  justify-content: center;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
 
-          font-weight: 900;
+.stat-plus {
+  font-family: 'Inter', sans-serif;
+  font-weight: 100;
+  font-size: 0.5em; /* Slightly larger makes centering look more intentional */
+  opacity: 0.3;
+  margin-left: 8px; /* Breathing room */
 
-        }
-
-        .stat-lbl {
-
-          font-size: clamp(7px, 0.6vw, 10px);
-
-          letter-spacing: 0.1em;
-
-          text-transform: uppercase;
-
-          color: #888;
-
-          margin-top: 4px;
-
-        }
-
-
+  /* Reset any previous transforms */
+  transform: none; 
+  display: inline-block;
+  line-height: 1;
+}
+.stat-lbl {
+  font-family: 'Inter', sans-serif;
+  font-weight: 500; /* Slightly bolder than the number for contrast */
+  font-size: clamp(8px, 0.6vw, 10px);
+  text-transform: uppercase;
+  color: #a0a0a0;
+  margin-top: 10px;
+  /* Ultra-wide tracking makes small text feel engineered */
+  letter-spacing: 0.5em; 
+}
 
         .cell-name {
 
@@ -512,9 +591,10 @@ height: 100%;
 
         .cell-resume:hover {
 
-          background: #1a1a1a;
+          background: #1a1a1a !important;
 
           color: #f8f8f7;
+          transition: background 0.25s ease, color 0.25s ease;
 
         }
 
@@ -524,7 +604,7 @@ height: 100%;
   grid-area: 7 / 5 / 9 / 8;
 
   display: flex;
-  align-items: baseline; /* 🔥 THIS is correct */
+  align-items: baseline; 
 
   padding: 0 10px 6px 10px;
 
@@ -533,6 +613,8 @@ height: 100%;
 
   overflow: hidden;
   border-right: none !important;
+
+ 
 }
   .main-wrap {
   display: inline-block;
@@ -551,19 +633,56 @@ height: 100%;
 /* SMALL SUFFIX */
 .suffix {
   font-size: clamp(24px, 2vw, 36px);
-
   margin-left: 10px;
 
   line-height: 1;
   letter-spacing: 0.08em;
-
   color: #333;
-  opacity: 0.85; 
 
-   transform: translateY(24px); 
+  opacity: 0;
+
+  /* final position */
+  transform: translateY(24px);
+
+  animation: riseSuffix 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
+
+.rise-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(80%);
+
+  animation: riseSmooth 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--delay);
+}
+
+/* DEV animation */
+
+@keyframes riseSmooth {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0%);
+  }
+}
+@keyframes riseSuffix {
+  0% {
+    opacity: 0;
+    transform: translateY(calc(24px + 40%));
+  }
+
+  100% {
+    opacity: 0.85;
+    transform: translateY(24px);
+  }
+}
+
+
 /* target the project and cgpa cells to remove their right border */
-.cell-projects, .cell-cgpa {
+.cell-cgpa {
   border-right: none !important;
 }
 
@@ -654,7 +773,34 @@ height: 100%;
   white-space: nowrap;
 
 }
-  
+.cell-logo {
+  grid-area: 1 / 1 / 3 / 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px;
+}
+
+/* LOGO IMAGE */
+.logo-img {
+  width: 100%;
+  height: 100%;
+
+  max-width: 60px;
+  max-height: 60px;
+
+  object-fit: contain;
+
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* subtle hover (matches your design language) */
+.cell-logo:hover .logo-img {
+  transform: scale(1.05);
+  opacity: 0.8;
+}  
 
 
 
@@ -668,7 +814,9 @@ height: 100%;
 
          
 
-          <div className="cell-logo">Logo</div>
+<div className="cell-logo">
+  <img src={logo} alt="PAS Logo" className="logo-img" />
+</div>
 
          
 
@@ -695,31 +843,23 @@ height: 100%;
 
          
 
-          <div className="cell-in-ai-dev">
-
-            IN / AI / DEV
-
-          </div>
-
-         
-
-          <div className="cell-projects">
-
-            <span className="stat-val">15+</span>
-
-            <span className="stat-lbl">Projects</span>
-
-          </div>
+ <div className="cell-in-ai-dev">
+  <span className="first-word-italic">ANITS</span>
+  <span className="normal-text">, B.TECH, AI&ML</span>
+</div>
 
          
+<div className="cell-projects">
+  <span className="stat-val">
+    15<span className="stat-plus">+</span>
+  </span>
+  <span className="stat-lbl">Projects</span>
+</div>
 
-          <div className="cell-cgpa">
-
-            <span className="stat-val">7.62</span>
-
-            <span className="stat-lbl">CGPA</span>
-
-          </div>
+<div className="cell-cgpa">
+  <span className="stat-val">7.62</span>
+  <span className="stat-lbl">CGPA</span>
+</div>
 
          
 
@@ -779,11 +919,33 @@ height: 100%;
 
          
 
-<div class="cell-android">
-  <span class="main-wrap">
-    <span class="main">ANDROID</span>
+<div className="cell-android" key={animKey}>
+  <span className="main-wrap">
+    <span className="main">
+      {mainWord.split("").map((char, i) => (
+        <span
+          key={i}
+          className="rise-letter"
+          style={{
+            "--delay": `${baseDelay + i * 0.085}s`,
+          }}
+        >
+          {char}
+        </span>
+      ))}
+    </span>
   </span>
-  <span class="suffix">DEV.</span>
+
+  {suffixWord && (
+    <span
+      className="suffix"
+      style={{
+        animationDelay: `${baseDelay + mainWord.length * 0.085 + 0.05}s`,
+      }}
+    >
+      {suffixWord}
+    </span>
+  )}
 </div>
 
 
