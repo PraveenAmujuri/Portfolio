@@ -520,23 +520,65 @@ height: 100%;
 
 
 
-        .cell-android {
+.cell-android {
+  grid-area: 7 / 5 / 9 / 8;
 
-          grid-area: 7 / 5 / 9 / 8;
+  display: flex;
+  align-items: baseline; /* 🔥 THIS is correct */
 
-          font-family: 'Playfair Display', serif;
+  padding: 0 10px 6px 10px;
 
-          font-size: clamp(20px, 2.5vw, 42px);
+  font-family: 'Inter', sans-serif;
+  text-transform: uppercase;
 
-          font-weight: 900;
+  overflow: hidden;
+  border-right: none !important;
+}
+  .main-wrap {
+  display: inline-block;
+  transform: scaleY(1.12);
+  transform-origin: bottom;
+}
+.main {
+  font-weight: 300;
+  font-size: clamp(70px, 7vw, 140px);
 
-          letter-spacing: 0.05em;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
 
-          text-transform: uppercase;
+  white-space: nowrap;
+}
+/* SMALL SUFFIX */
+.suffix {
+  font-size: clamp(24px, 2vw, 36px);
 
-        }
+  margin-left: 10px;
+
+  line-height: 1;
+  letter-spacing: 0.08em;
+
+  color: #333;
+  opacity: 0.85; 
+
+   transform: translateY(24px); 
+}
+/* target the project and cgpa cells to remove their right border */
+.cell-projects, .cell-cgpa {
+  border-right: none !important;
+}
+
+/* target any empty grid cells that are in the 7th column */
+/* Since your grid is 8 columns, column 7 is the one before your name */
+.grid-8x8 > div[style*="grid-column: 7"], 
+.grid-8x8 > div[style*="/ 8"] {
+  border-right: none !important;
+}
 
 
+/* Add this specific selector for column 7 empty cells */
+.empty-grid-cell[style*="7 / 8"] {
+  border-right: none !important;
+}
 
         /* ─── MOBILE OVERRIDE ─── */
 
@@ -737,11 +779,12 @@ height: 100%;
 
          
 
-          <div className="cell-android">
-
-            Android Development
-
-          </div>
+<div class="cell-android">
+  <span class="main-wrap">
+    <span class="main">ANDROID</span>
+  </span>
+  <span class="suffix">DEV.</span>
+</div>
 
 
 
