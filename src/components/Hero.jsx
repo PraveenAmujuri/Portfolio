@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense, useRef } from "react";
 
 import profile from "../assets/profile.png";
 
 import TextPressure from "../components/TextPressure";
 import logo from "../assets/logo/logo.svg";
+
+import { Canvas } from '@react-three/fiber';
+import { Environment, ContactShadows, OrbitControls } from '@react-three/drei';
+import { Macbook } from "./Macbook";
 
 
 const SHAPES = [
@@ -37,6 +41,7 @@ export default function Hero() {
 const [role, setRole] = useState(ROLES[0]);
 const [animKey, setAnimKey] = useState(0);
 const [mainWord, suffixWord] = role.split(" ");
+const controls = useRef()
 useEffect(() => {
   const interval = setInterval(() => {
     setRoleIndex((prev) => {
@@ -112,21 +117,17 @@ const baseDelay = 0.4; // wait for PRAVEEN to finish
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Notable&display=swap');
         /* ─── THE 100VH 16:9 WRAPPER ─── */
 
-        .blueprint-wrapper {
-
-          margin-top: 40px;
-
-          height: calc(100vh - 80px);
-
-          width: 100%;
-
-          background: #1a1a1a;
-
-          box-sizing: border-box;
-
-          border-bottom: 1px solid #1a1a1a;
-
-        }
+/* Locate this block in your CSS */
+.blueprint-wrapper {
+  margin-top: 40px;
+  height: calc(100vh - 80px);
+  width: 100%;
+  /* CHANGE THIS from #1a1a1a to your grid color */
+  background: #f8f8f7 !important; 
+  box-sizing: border-box;
+  /* You can remove or lighten this border too */
+  border-bottom: 1px solid #f8f8f7; 
+}
 
 
 
@@ -801,14 +802,41 @@ height: 100%;
   transform: scale(1.05);
   opacity: 0.8;
 }  
-
-
+/* Add this to your style section */
+/* Update in your style section */
+.three-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 50;
+  pointer-events: auto; /* ✅ REQUIRED */
+}
 
       `}</style>
 
 
 
-      <div className="blueprint-wrapper">
+<div className="blueprint-wrapper" style={{ position: 'relative' }}>
+      {/* 1. THE 3D LAYER (FLOATING) */}
+  {/* 1. FULL SCREEN 3D LAYER */}
+<div className="three-container">
+<Canvas camera={{ position: [0, 2, 12], fov: 35 }}>
+  <OrbitControls ref={controls} enableZoom={false} enablePan={false} />
+
+  <ambientLight intensity={1.5} />
+
+  <Suspense fallback={null}>
+    <Macbook 
+      scale={12} 
+      position={[1.5, -0.5, 0]} 
+      controls={controls}
+    />
+    <Environment preset="city" />
+  </Suspense>
+</Canvas>
+</div>
 
         <section className="grid-8x8">
 
@@ -947,6 +975,7 @@ height: 100%;
     </span>
   )}
 </div>
+
 
 
 
