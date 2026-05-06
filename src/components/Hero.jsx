@@ -6,6 +6,7 @@ import TextPressure from "../components/TextPressure";
 import logo from "../assets/logo/logo.svg";
 import {RevealWaveImage} from "./ui/reveal-wave-image";
 import { Canvas } from '@react-three/fiber';
+import { useProgress, Html } from '@react-three/drei';
 import { Environment, ContactShadows, OrbitControls } from '@react-three/drei';
 import { Macbook } from "./Macbook";
 
@@ -41,7 +42,23 @@ export default function Hero() {
 const [role, setRole] = useState(ROLES[0]);
 const [animKey, setAnimKey] = useState(0);
 const [mainWord, suffixWord] = role.split(" ");
-const controls = useRef()
+const controls = useRef();
+
+const { progress } = useProgress(); // Tracks the actual download %
+  const [isFinished, setIsFinished] = useState(false);
+  const [showContent, setShowContent] = useState(false);
+
+  useEffect(() => {
+    // When progress hits 100, we give it a tiny buffer to "pre-warm" the GPU
+    if (progress === 100) {
+      const timer = setTimeout(() => {
+        setIsFinished(true);
+        // Start showing the main UI animations slightly after the fade
+        setTimeout(() => setShowContent(true), 400);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [progress]);
 
 useEffect(() => {
   const interval = setInterval(() => {
@@ -814,10 +831,72 @@ height: 100%;
   z-index: 100;       /* Higher than the .three-container */
   pointer-events: auto; 
 }
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: #f8f8f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.8s ease-in-out;
+}
 
+.loading-screen.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.loader-name {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  letter-spacing: 0.8em;
+  font-size: 14px;
+  color: #111;
+}
+
+.loader-bar-bg {
+  width: 200px;
+  height: 2px;
+  background: rgba(0,0,0,0.05);
+  position: relative;
+}
+
+.loader-bar-fill {
+  position: absolute;
+  top: 0; left: 0; height: 100%;
+  background: #111;
+  transition: width 0.3s ease-out;
+}
+
+.loader-status {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: #888;
+  text-transform: uppercase;
+}
       `}</style>
 
 
+<div className={`loading-screen ${isFinished ? 'fade-out' : ''}`}>
+        <div className="loader-content">
+          <span className="loader-name">PRAVEEN MUJURI</span>
+          <div className="loader-bar-bg">
+            <div className="loader-bar-fill" style={{ width: `${progress}%` }}></div>
+          </div>
+          <span className="loader-status">
+            {progress < 100 ? `LOADING ASSETS ${Math.round(progress)}%` : "READY TO EXPLORE"}
+          </span>
+        </div>
+      </div>
 
 <div className="blueprint-wrapper" style={{ position: 'relative' }}>
       {/* 1. THE 3D LAYER (FLOATING) */}
