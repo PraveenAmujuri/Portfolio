@@ -142,6 +142,7 @@ const baseDelay = 0.4; // wait for PRAVEEN to finish
   box-sizing: border-box;
   /* You can remove or lighten this border too */
   border-bottom: 1px solid #f8f8f7; 
+  z-index: 10;
 }
 
 
@@ -818,18 +819,19 @@ height: 100%;
   left: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 50;
+  z-index: 30;
   pointer-events: none; 
 }
   .three-container canvas {
   /* 2. Make the model/canvas interactive again */
   pointer-events: auto; 
 }
-  .cell-name, 
-.cell-resume {
-  position: relative; /* REQUIRED for z-index to work */
-  z-index: 100;       /* Higher than the .three-container */
-  pointer-events: auto; 
+.cell-name, 
+.cell-resume, 
+.cell-image {
+  position: relative;
+  z-index: 40; 
+  pointer-events: auto;
 }
 .loading-screen {
   position: fixed;
@@ -888,7 +890,7 @@ height: 100%;
 
 <div className={`loading-screen ${isFinished ? 'fade-out' : ''}`}>
         <div className="loader-content">
-          <span className="loader-name">PRAVEEN MUJURI</span>
+          <span className="loader-name">PRAVEEN AMUJURI</span>
           <div className="loader-bar-bg">
             <div className="loader-bar-fill" style={{ width: `${progress}%` }}></div>
           </div>
@@ -1000,7 +1002,7 @@ height: 100%;
 {"PRAVEEN".split("").map((char, index) => (
   <span
     key={index}
-    className="letter-wrap structured-drop"
+    className={`letter-wrap ${isFinished ? "structured-drop" : ""}`}
     style={{ "--delay": `${index * 0.1}s` }}
   >
     <span className="letter letter-fill">{char}</span>
@@ -1010,7 +1012,7 @@ height: 100%;
   </div>
 </div>
          
-<div className="cell-image" style={{ zIndex: 60, position: 'relative' }}>
+<div className="cell-image" style={{ position: 'relative' }}>
   <RevealWaveImage
     src={profile}
     waveSpeed={0.2}         // Slower for better professional feel
@@ -1043,7 +1045,7 @@ height: 100%;
       {mainWord.split("").map((char, i) => (
         <span
           key={i}
-          className="rise-letter"
+          className={isFinished ? "rise-letter" : ""}
           style={{
             "--delay": `${baseDelay + i * 0.085}s`,
           }}
@@ -1056,7 +1058,7 @@ height: 100%;
 
   {suffixWord && (
     <span
-      className="suffix"
+      className={isFinished ? "suffix" : ""}
       style={{
         animationDelay: `${baseDelay + mainWord.length * 0.085 + 0.05}s`,
       }}
