@@ -9,6 +9,8 @@ import { Canvas } from '@react-three/fiber';
 import { useProgress, Html } from '@react-three/drei';
 import { Environment, ContactShadows, OrbitControls } from '@react-three/drei';
 import { Macbook } from "./Macbook";
+import * as THREE from 'three';
+
 
 
 const SHAPES = [
@@ -84,7 +86,41 @@ const { progress } = useProgress();
     return () => clearInterval(interval);
   }, []);
   // ──────────────────────────────────────────────────────────────────────────
+// Inside your main App or Page component
+const aboutRef = useRef(null);
+const [scrollProgress, setScrollProgress] = useState(0);
 
+
+// Hero.jsx
+useEffect(() => {
+  const handleScroll = () => {
+    const target = document.getElementById('about');
+    if (!target) return;
+    
+    const rect = target.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+
+    // Laptop starts moving when the About section is 500px away from view
+    const startTrigger = windowHeight + 500; 
+    const endTrigger = windowHeight * 0.2; 
+
+    const progress = THREE.MathUtils.mapLinear(
+      rect.top,
+      startTrigger, // Value when it should be at start of path
+      endTrigger,   // Value when it should be at end of path
+      0,
+      1
+    );
+    
+    setScrollProgress(THREE.MathUtils.clamp(progress, 0, 1));
+  };
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  return () => window.removeEventListener("scroll", handleScroll);
+}, []);
+
+// Pass this progress down to the Macbook component
+// <Macbook scrollProgress={scrollProgress} ... />
 useEffect(() => {
   const interval = setInterval(() => {
     setRoleIndex((prev) => {
@@ -1499,6 +1535,7 @@ useEffect(() => {
       position={[1.5, -0.5, 0]} 
       controls={controls}
       startAnimation={showContent}
+      scrollProgress={scrollProgress} 
     />
     <ContactShadows
   position={[0, -1.4, 0]}
@@ -1664,6 +1701,18 @@ useEffect(() => {
         </section>
 
       </div>
+       <div
+    id="path-start"
+    className="absolute left-[58%] top-[58%] w-2 h-2 opcity-0 pointer-events-none z-[50]"
+  />
+
+  <div
+    id="path-mid"
+    className="absolute left-[42%] top-[78%] w-4 h-4 rounded-full opcity-0 pointer-events-none z-[50]"
+  />
+  
+
+      
 
 </div>
 {/* END DESKTOP HERO */}

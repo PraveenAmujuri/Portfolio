@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import { useMemo, useRef, useState, useEffect } from "react";
-useTexture.preload("/path/to/your/profile.webp");
+useTexture.preload("../assets/profile.webp");
 // Vertex and Fragment Shaders stay exactly as you have them.
 const vertexShader = `
   varying vec2 vUv;
