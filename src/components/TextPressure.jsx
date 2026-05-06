@@ -68,7 +68,7 @@ const TextPressure = ({
 
 
 
-  flex = true,
+  flex = false,
 
   stroke = false,
 
@@ -169,54 +169,29 @@ const chars = text.split('').map(c => (c === ' ' ? '\u00A0' : c));
   }, []);
 
 
+const setSize = useCallback(() => {
+  if (!containerRef.current || !titleRef.current) return;
 
-  const setSize = useCallback(() => {
+  const {
+    width: containerW,
+    height: containerH
+  } = containerRef.current.getBoundingClientRect();
 
-    if (!containerRef.current || !titleRef.current) return;
+  // Width-based size
+  let widthSize = containerW / (chars.length / 1.8);
 
+  // Height-based size (IMPORTANT FIX)
+  let heightSize = containerH * 0.6; // adjust this (0.5–0.7 works best)
 
+  // Take smaller one to prevent overflow
+  let newFontSize = Math.min(widthSize, heightSize);
 
-    const { width: containerW, height: containerH } = containerRef.current.getBoundingClientRect();
+  newFontSize = Math.max(newFontSize, minFontSize);
 
-
-
-    newFontSize = containerW / (chars.length / 1.8);
-
-    newFontSize = Math.max(newFontSize, minFontSize);
-
-
-
-    setFontSize(newFontSize);
-
-    setScaleY(1);
-
-    setLineHeight(1);
-
-
-
-    requestAnimationFrame(() => {
-
-      if (!titleRef.current) return;
-
-      const textRect = titleRef.current.getBoundingClientRect();
-
-
-
-      if (scale && textRect.height > 0) {
-
-        const yRatio = containerH / textRect.height;
-
-        setScaleY(yRatio);
-
-        setLineHeight(yRatio);
-
-      }
-
-    });
-
-  }, [chars.length, minFontSize, scale]);
-
-
+  setFontSize(newFontSize);
+  setScaleY(1);
+  setLineHeight(1);
+}, [chars.length, minFontSize]);
 
   useEffect(() => {
 

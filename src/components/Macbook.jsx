@@ -2,11 +2,12 @@ import React, { useRef, useState } from 'react'
 import { useGLTF } from '@react-three/drei'
 import { useFrame } from '@react-three/fiber'
 import { MathUtils } from 'three'
-
+useGLTF.preload('/models/macbook/scene-transformed.glb');
 export function Macbook({ controls, ...props }) {
   const lidRef = useRef()
   const group = useRef()
   const [open, setOpen] = useState(false)
+  
 
   const { nodes, materials } = useGLTF('/models/macbook/scene-transformed.glb')
 

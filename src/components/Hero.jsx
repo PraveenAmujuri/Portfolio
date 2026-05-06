@@ -1,10 +1,10 @@
 import React, { useEffect, useState, Suspense, useRef } from "react";
 
-import profile from "../assets/profile.png";
+import profile from "../assets/profile.webp";
 
 import TextPressure from "../components/TextPressure";
 import logo from "../assets/logo/logo.svg";
-
+import {RevealWaveImage} from "./ui/reveal-wave-image";
 import { Canvas } from '@react-three/fiber';
 import { Environment, ContactShadows, OrbitControls } from '@react-three/drei';
 import { Macbook } from "./Macbook";
@@ -42,6 +42,7 @@ const [role, setRole] = useState(ROLES[0]);
 const [animKey, setAnimKey] = useState(0);
 const [mainWord, suffixWord] = role.split(" ");
 const controls = useRef()
+
 useEffect(() => {
   const interval = setInterval(() => {
     setRoleIndex((prev) => {
@@ -111,9 +112,6 @@ const baseDelay = 0.4; // wait for PRAVEEN to finish
       <style>{`
 
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,900;1,400;1,900&family=DM+Mono:wght@300;400&display=swap');
-
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@900&family=Inter:wght@900&family=DM+Mono:wght@300;400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Notable&display=swap');
         /* ─── THE 100VH 16:9 WRAPPER ─── */
 
@@ -158,10 +156,6 @@ const baseDelay = 0.4; // wait for PRAVEEN to finish
   background: #f8f8f7 !important;
 
   gap: 0;
-
- 
-
-  font-family: 'DM Mono', monospace;
 
   /* Deep charcoal for text, not pure black, for better legibility */
 
@@ -481,19 +475,16 @@ height: 100%;
   0% {
     opacity: 0;
     transform: translateY(-100%) scale(0.98);
-    filter: blur(3px);
   }
 
   70% {
     opacity: 1;
     transform: translateY(4%) scale(1);
-    filter: blur(0.5px);
   }
 
   100% {
     opacity: 1;
     transform: translateY(0%) scale(1);
-    filter: blur(0);
   }
 }
 .letter-wrap {
@@ -648,15 +639,15 @@ height: 100%;
   animation: riseSuffix 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
+/* Add this to your style block */
 .rise-letter {
   display: inline-block;
   opacity: 0;
   transform: translateY(80%);
-
+  will-change: transform, opacity; /* 🔥 Force GPU acceleration */
   animation: riseSmooth 0.48s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   animation-delay: var(--delay);
 }
-
 /* DEV animation */
 
 @keyframes riseSmooth {
@@ -811,7 +802,17 @@ height: 100%;
   width: 100vw;
   height: 100vh;
   z-index: 50;
-  pointer-events: auto; /* ✅ REQUIRED */
+  pointer-events: none; 
+}
+  .three-container canvas {
+  /* 2. Make the model/canvas interactive again */
+  pointer-events: auto; 
+}
+  .cell-name, 
+.cell-resume {
+  position: relative; /* REQUIRED for z-index to work */
+  z-index: 100;       /* Higher than the .three-container */
+  pointer-events: auto; 
 }
 
       `}</style>
@@ -822,8 +823,30 @@ height: 100%;
       {/* 1. THE 3D LAYER (FLOATING) */}
   {/* 1. FULL SCREEN 3D LAYER */}
 <div className="three-container">
-<Canvas camera={{ position: [0, 2, 12], fov: 35 }}>
-  <OrbitControls ref={controls} enableZoom={false} enablePan={false} />
+<Canvas 
+  camera={{ position: [0, 2, 12], fov: 35 }}
+  dpr={[1, 2]} // 🔥 Limit resolution on high-dpi screens to save GPU
+  gl={{ antialias: true, powerPreference: "high-performance" }} // 🔥 Request GPU power
+>
+<OrbitControls 
+  ref={controls} 
+  enableZoom={false} 
+  enablePan={false} 
+  // 1. HORIZONTAL LIMITS (left to right)
+  // -Math.PI / 4 is 45 degrees left, Math.PI / 4 is 45 degrees right
+  minAzimuthAngle={-Math.PI / 3} 
+  maxAzimuthAngle={Math.PI / 3}
+  
+  // 2. VERTICAL LIMITS (up and down)
+  // Math.PI / 2 is level with the horizon. 
+  // This range prevents flipping it upside down.
+  minPolarAngle={Math.PI / 2.5} 
+  maxPolarAngle={Math.PI / 1.8} 
+  
+  // 3. SMOOTHING
+  enableDamping={true}
+  dampingFactor={0.05}
+/>
 
   <ambientLight intensity={1.5} />
 
@@ -833,7 +856,7 @@ height: 100%;
       position={[1.5, -0.5, 0]} 
       controls={controls}
     />
-    <Environment preset="city" />
+    <Environment preset="studio" background={false} frames={1} />
   </Suspense>
 </Canvas>
 </div>
@@ -908,29 +931,17 @@ height: 100%;
   </div>
 </div>
          
-
-          <div className="cell-image">
-
-            <img
-
-              src={profile}
-
-              alt="Profile"
-
-              className="sketch-img"
-
-              style={{
-
-                clipPath: SHAPES[shapeIdx],
-
-                opacity: fading ? 0 : 1,
-
-              }}
-
-            />
-
-          </div>
-
+<div className="cell-image" style={{ zIndex: 60, position: 'relative' }}>
+  <RevealWaveImage
+    src={profile}
+    waveSpeed={0.2}         // Slower for better professional feel
+    waveFrequency={1.5}     // Less "busy"
+    waveAmplitude={0.15}    // Subtle distortion
+    revealRadius={0.4}     // Large enough to see the face on hover
+    revealSoftness={0.8}    // Very smooth transition
+    pixelSize={1}
+  />
+</div>
          
 
           <div
