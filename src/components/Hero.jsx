@@ -936,7 +936,15 @@ height: 100%;
       scale={12} 
       position={[1.5, -0.5, 0]} 
       controls={controls}
+      startAnimation={showContent}
     />
+    <ContactShadows
+  position={[0, -1.4, 0]}
+  opacity={0.18}
+  scale={10}
+  blur={2.5}
+  far={4}
+/>
     <Environment preset="studio" background={false} frames={1} />
   </Suspense>
 </Canvas>
@@ -1100,4 +1108,3 @@ height: 100%;
   );
 
 }
-
