@@ -89,6 +89,7 @@ const { progress } = useProgress();
 // Inside your main App or Page component
 const aboutRef = useRef(null);
 const [scrollProgress, setScrollProgress] = useState(0);
+const [scrollOffset, setScrollOffset] = useState(0);
 
 
 // Hero.jsx
@@ -99,9 +100,12 @@ useEffect(() => {
     
     const rect = target.getBoundingClientRect();
     const windowHeight = window.innerHeight;
+    const scrollY = window.scrollY || window.pageYOffset;
+    const initialRectTop = rect.top + scrollY;
 
-    // Laptop starts moving when the About section is 500px away from view
-    const startTrigger = windowHeight + 500; 
+    // Laptop starts moving when the About section is 500px away from view,
+    // but we clamp it to the initial top position to ensure progress is exactly 0 at scrollY = 0.
+    const startTrigger = Math.min(initialRectTop, windowHeight + 500); 
     const endTrigger = windowHeight * 0.2; 
 
     const progress = THREE.MathUtils.mapLinear(
@@ -112,7 +116,8 @@ useEffect(() => {
       1
     );
     
-    setScrollProgress(THREE.MathUtils.clamp(progress, 0, 1));
+    setScrollProgress(progress);
+    setScrollOffset(rect.top < endTrigger ? rect.top - endTrigger : 0);
   };
 
   window.addEventListener("scroll", handleScroll, { passive: true });
@@ -1535,7 +1540,8 @@ useEffect(() => {
       position={[1.5, -0.5, 0]} 
       controls={controls}
       startAnimation={showContent}
-      scrollProgress={scrollProgress} 
+      scrollProgress={scrollProgress}
+      scrollOffset={scrollOffset}
     />
     <ContactShadows
   position={[0, -1.4, 0]}

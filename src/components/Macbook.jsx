@@ -1,13 +1,13 @@
 import React, { useRef, useState } from 'react'
 import { useGLTF } from '@react-three/drei'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 
 const curve = new THREE.CatmullRomCurve3([
   new THREE.Vector3(1.5, -0.5, 0),
   new THREE.Vector3(-0.5, -0.8, -0.1),
   new THREE.Vector3(-1.8, -1.5, -0.3),
-  new THREE.Vector3(-3.1, -2.28, -0.55),
+  new THREE.Vector3(-1.9, -2.78, -0.55),
 ])
 
 useGLTF.preload('/models/macbook/scene-transformed.glb')
@@ -15,8 +15,12 @@ useGLTF.preload('/models/macbook/scene-transformed.glb')
 export function Macbook({
   startAnimation,
   scrollProgress = 0,
+  scrollOffset = 0,
+  controls,
   ...props
 }) {
+
+  const { camera } = useThree()
 
   const lidRef = useRef()
   const group = useRef()
@@ -25,7 +29,14 @@ export function Macbook({
   const introProgress = useRef(0)
 
   const smoothedProgress = useRef(0)
+  const smoothedOffset = useRef(0)
   const lastInteraction = useRef(0)
+
+  const lastCameraPos = useRef(new THREE.Vector3(0, 2, 12))
+  const lastCameraTarget = useRef(new THREE.Vector3(0, 0, 0))
+  const defaultCameraPos = useRef(new THREE.Vector3(0, 2, 12))
+  const defaultCameraTarget = useRef(new THREE.Vector3(0, 0, 0))
+  const isTransitioning = useRef(false)
 
   const { nodes, materials } = useGLTF(
     '/models/macbook/scene-transformed.glb'
@@ -41,6 +52,11 @@ export function Macbook({
   useFrame(() => {
 
     if (!group.current) return
+
+    // Disable OrbitControls during intro drop
+    if (controls && controls.current && !introDone.current) {
+      controls.current.enabled = false
+    }
 
     /*
       INTRO DROP
@@ -102,14 +118,81 @@ export function Macbook({
     */
     if (introDone.current) {
 
+      let lerpFactor = 0.05
+      if (scrollProgress <= 0.001) {
+        lerpFactor = 0.15 // Smooth but faster return when going to 0
+      } else if (scrollProgress > 0.8) {
+        // Linearly scale lerpFactor from 0.05 to 1.0 between 0.8 and 1.0 scrollProgress
+        lerpFactor = THREE.MathUtils.mapLinear(
+          Math.min(scrollProgress, 1.0),
+          0.8,
+          1.0,
+          0.05,
+          1.0
+        )
+      }
+
       smoothedProgress.current =
         THREE.MathUtils.lerp(
           smoothedProgress.current,
           scrollProgress,
-          0.1
+          lerpFactor
         )
 
-      const t = smoothedProgress.current
+      // Snap to 0 when very close to prevent asymptotic slow decay and enable interactivity instantly
+      if (scrollProgress <= 0.001 && smoothedProgress.current < 0.01) {
+        smoothedProgress.current = 0
+      }
+
+      const rawT = smoothedProgress.current
+      const t = THREE.MathUtils.clamp(rawT, 0, 1)
+
+      /*
+        CAMERA COORDINATION / ORBITCONTROLS SYNC
+      */
+      if (controls && controls.current) {
+        if (t <= 0.001) {
+          if (isTransitioning.current) {
+            // Smooth transition has finished: snap exactly to the saved interactive camera pose
+            camera.position.copy(lastCameraPos.current)
+            controls.current.target.copy(lastCameraTarget.current)
+            controls.current.update()
+            controls.current.enabled = true
+            isTransitioning.current = false
+          } else {
+            // Actively tracking user interactions in Hero mode
+            controls.current.enabled = true
+            lastCameraPos.current.copy(camera.position)
+            lastCameraTarget.current.copy(controls.current.target)
+          }
+        } else {
+          // Currently scrolling: disable controls and lock camera tracking
+          isTransitioning.current = true
+          controls.current.enabled = false
+          
+          const blendRange = 0.35
+          // Calculate blend factor using the smoothed progress
+          const t_val = Math.min(t / blendRange, 1)
+          // Smoothstep easing: 3x^2 - 2x^3
+          const t_blend = t_val * t_val * (3 - 2 * t_val)
+
+          // Smoothly interpolate camera position from last interactive pose to default pose
+          camera.position.lerpVectors(
+            lastCameraPos.current,
+            defaultCameraPos.current,
+            t_blend
+          )
+
+          // Smoothly interpolate lookAt target from last interactive target to default target
+          const currentTarget = new THREE.Vector3()
+          currentTarget.lerpVectors(
+            lastCameraTarget.current,
+            defaultCameraTarget.current,
+            t_blend
+          )
+          camera.lookAt(currentTarget)
+        }
+      }
 
       /*
         FOLLOW CURVE
@@ -179,41 +262,25 @@ export function Macbook({
       /*
         AUTO LID SYSTEM
       */
+      const nearDesk = t > 0.92
 
- /*
-  AUTO LID SYSTEM
-*/
+      if (t > 0.001 && t < 0.90) {
+        // Force close when scrolling between Hero and About
+        if (lidState !== 'closed') {
+          setLidState('closed')
+        }
+      } else if (nearDesk) {
+        // Auto open when landing on the desk, if not recently interacted (so user click can override it)
+        const recentlyInteracted = Date.now() - lastInteraction.current < 3000
+        if (!recentlyInteracted && lidState === 'closed') {
+          setLidState('full')
+        }
+      }
 
-const nearDesk = t > 0.92
-
-const recentlyInteracted =
-  Date.now() -
-    lastInteraction.current <
-  3000
-
-if (!recentlyInteracted) {
-
-  /*
-    AUTO OPEN
-  */
-  if (
-    nearDesk &&
-    lidState === 'closed'
-  ) {
-    setLidState('full')
-  }
-
-  /*
-    AUTO CLOSE
-    only when leaving section
-  */
-  if (
-    t < 0.90 &&
-    lidState === 'full'
-  ) {
-    setLidState('closed')
-  }
-}
+      const container = document.querySelector('.three-container')
+      if (container) {
+        container.style.transform = `translateY(${scrollOffset}px)`
+      }
     }
 
     /*
